@@ -10,10 +10,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -40,6 +43,7 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.ragazm.bakingapp.bakingapp.model.Step;
+import com.squareup.picasso.Picasso;
 
 /**
  * A fragment representing a single Recipe detail screen.
@@ -53,6 +57,9 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
      * represents.
      */
     public static final String ARG_ITEM_ID = "";
+    public static final String STEP_KEY = "step_key";
+    private static final String POSITION_KEY = "pos_key";
+    private static final String PLAY_WHEN_READY_KEY = "play_when_ready_key";
 
     /**
      * The dummy content this fragment is presenting.
@@ -63,6 +70,9 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
     private boolean mPlayWhenReady = true;
     public SimpleExoPlayerView playerView;
     public Context context;
+    private boolean fullScreenMode;
+    private long videoLastPosition;
+
 
 
     /**
@@ -99,14 +109,40 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.ingredient_detail, container, false);
+        ImageView thumbnailImage = rootView.findViewById(R.id.thumbnailImage);
         playerView = rootView.findViewById(R.id.video_player);
-        initializePlayer(mItem.videoURL);
+
+        if (savedInstanceState != null && savedInstanceState.containsKey(POSITION_KEY)) {
+            mCurrentPosition = savedInstanceState.getLong(POSITION_KEY);
+            mPlayWhenReady = savedInstanceState.getBoolean(PLAY_WHEN_READY_KEY);
+        }
+
         // Show the dummy content as text in a TextView.
         if (mItem != null) {
             ((TextView) rootView.findViewById(R.id.recipe_detail)).setText(mItem.description);
         }
 
+        assert mItem != null;
+        if(!mItem.getThumbnailURL().isEmpty()){
+
+            Picasso.with(getContext())
+                    .load(mItem.getThumbnailURL())
+                    .into(thumbnailImage);
+
+            thumbnailImage.setVisibility(View.VISIBLE);
+        }
+        initializePlayer(mItem.videoURL);
+        Log.w("POSITION-createView:",""+mCurrentPosition);
+
         return rootView;
+    }
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putLong(POSITION_KEY, mCurrentPosition);
+        outState.putBoolean(PLAY_WHEN_READY_KEY, mPlayWhenReady);
+        super.onSaveInstanceState(outState);
+
+
     }
 
     /**
@@ -142,6 +178,7 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
             MediaSource videoSource = new ExtractorMediaSource(Uri.parse(path),
                     dataSourceFactory, extractorsFactory, null, null);
             // Prepare the player with the source.
+
             player.addListener(this);
             player.prepare(videoSource);
             playerView.requestFocus();
@@ -153,18 +190,39 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
         if(player != null){
-        player.release();   //it is important to release a player
-    }
+            mCurrentPosition = player.getCurrentPosition();
+            player.release();
+        }
+        super.onDestroy();
+          //it is important to release a player
     }
 
     @Override
     public void onPause() {
-        super.onPause();
+
         if (player != null) {
-            player.setPlayWhenReady(false); //to pause a video because now our video player is not in focus
+            mPlayWhenReady = player.getPlayWhenReady();
+            mCurrentPosition = player.getCurrentPosition();
+
+            player.stop();
+            player.release();
+            player = null;
         }
+        super.onPause();
+    }
+    @Override
+    public void onStop(){
+
+        if (player != null) {
+            mPlayWhenReady = player.getPlayWhenReady();
+            mCurrentPosition = player.getCurrentPosition();
+            player.stop();
+            player.release();
+            player = null;
+        }
+        super.onStop();
     }
 
     @Override
@@ -213,6 +271,16 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
         AlertDialog ad = adb.create();
         ad.show();
 
+    }
+    @Override
+    public void onResume() {
+
+        initializePlayer(mItem.videoURL);
+        if (mCurrentPosition != 0) {
+            player.seekTo(mCurrentPosition);
+
+        }
+        super.onResume();
     }
 
     @Override

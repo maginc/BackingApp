@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="?android:attr/textAppearanceLarge"
     android:layout_width="match_parent"
@@ -17,7 +18,17 @@
             android:id="@+id/video_player"
             android:layout_width="match_parent"
             android:layout_height="250dp"
+            android:visibility="gone" >
+
+        </com.google.android.exoplayer2.ui.SimpleExoPlayerView>
+
+        <ImageView
+            android:id="@+id/thumbnailImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"
             android:visibility="gone" />
+
         <TextView
             android:id="@+id/recipe_detail"
             android:layout_width="match_parent"
