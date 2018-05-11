@@ -70,8 +70,6 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
     private boolean mPlayWhenReady = true;
     public SimpleExoPlayerView playerView;
     public Context context;
-    private boolean fullScreenMode;
-    private long videoLastPosition;
 
 
 
