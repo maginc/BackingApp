@@ -129,7 +129,7 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
 
             thumbnailImage.setVisibility(View.VISIBLE);
         }
-     //   initializePlayer(mItem.videoURL);
+
 
         return rootView;
     }
