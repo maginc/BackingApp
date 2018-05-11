@@ -225,7 +225,7 @@ public class IngredientListActivity extends AppCompatActivity {
 
         @Override
         public int getItemCount() {
-            return mValues.size();
+            return 3 + mValues.size();
         }
 
         class StepViewHolder extends RecyclerView.ViewHolder {

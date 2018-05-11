@@ -57,7 +57,6 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
      * represents.
      */
     public static final String ARG_ITEM_ID = "";
-    public static final String STEP_KEY = "step_key";
     private static final String POSITION_KEY = "pos_key";
     private static final String PLAY_WHEN_READY_KEY = "play_when_ready_key";
 
@@ -179,7 +178,7 @@ public class IngredientDetailFragment extends Fragment implements ExoPlayer.Even
             player.addListener(this);
             player.prepare(videoSource);
             playerView.requestFocus();
-            player.setPlayWhenReady(true);      // to play video when ready. Use false to pause a video
+            player.setPlayWhenReady(mPlayWhenReady);      // to play video when ready. Use false to pause a video
         }
     }
 
